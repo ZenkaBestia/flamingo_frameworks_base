@@ -22,6 +22,7 @@ import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.app.IActivityManager;
 import android.app.SynchronousUserSwitchObserver;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -104,6 +105,20 @@ public class PhoneStatusBarPolicy
 
     static final int LOCATION_STATUS_ICON_ID = PrivacyType.TYPE_LOCATION.getIconId();
 
+    private static final int[] BLUETOOTH_LEVEL_ARRAY = new int[] {
+        R.drawable.stat_sys_data_bluetooth_connected_battery_0,
+        R.drawable.stat_sys_data_bluetooth_connected_battery_1,
+        R.drawable.stat_sys_data_bluetooth_connected_battery_2,
+        R.drawable.stat_sys_data_bluetooth_connected_battery_3,
+        R.drawable.stat_sys_data_bluetooth_connected_battery_4,
+        R.drawable.stat_sys_data_bluetooth_connected_battery_5,
+        R.drawable.stat_sys_data_bluetooth_connected_battery_6,
+        R.drawable.stat_sys_data_bluetooth_connected_battery_7,
+        R.drawable.stat_sys_data_bluetooth_connected_battery_8,
+        R.drawable.stat_sys_data_bluetooth_connected_battery_9
+    };
+
+    private final String mSlotNetworkTraffic;
     private final String mSlotCast;
     private final String mSlotHotspot;
     private final String mSlotBluetooth;
@@ -158,7 +173,7 @@ public class PhoneStatusBarPolicy
 
     private boolean mManagedProfileIconVisible = false;
 
-    private BluetoothController mBluetooth;
+    private final BluetoothController mBluetooth;
     private AlarmManager.AlarmClockInfo mNextAlarm;
 
     @Inject
@@ -439,22 +454,22 @@ public class PhoneStatusBarPolicy
     }
 
     private final void updateBluetooth() {
-        int iconId = R.drawable.stat_sys_data_bluetooth_connected;
-        String contentDescription =
-                mResources.getString(R.string.accessibility_quick_settings_bluetooth_on);
-        boolean bluetoothVisible = false;
-        if (mBluetooth != null) {
-            if (mBluetooth.isBluetoothConnected()
-                    && (mBluetooth.isBluetoothAudioActive()
-                    || !mBluetooth.isBluetoothAudioProfileOnly())) {
-                contentDescription = mResources.getString(
-                        R.string.accessibility_bluetooth_connected);
-                bluetoothVisible = mBluetooth.isBluetoothEnabled();
+        if (mBluetooth.isBluetoothConnected()
+                && (mBluetooth.isBluetoothAudioActive()
+                || !mBluetooth.isBluetoothAudioProfileOnly())) {
+            final int batteryLevel = mBluetooth.getBatteryLevel();
+            final int iconId;
+            if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+                iconId = BLUETOOTH_LEVEL_ARRAY[Math.max(0, (batteryLevel / 10) - 1)];
+            } else {
+                iconId = R.drawable.stat_sys_data_bluetooth_connected;
             }
+            mIconController.setIcon(mSlotBluetooth, iconId, mResources.getString(
+                    R.string.accessibility_bluetooth_connected));
+            mIconController.setIconVisibility(mSlotBluetooth, true);
+        } else {
+            mIconController.setIconVisibility(mSlotBluetooth, false);
         }
-
-        mIconController.setIcon(mSlotBluetooth, iconId, contentDescription);
-        mIconController.setIconVisibility(mSlotBluetooth, bluetoothVisible);
     }
 
     private final void updateTTY() {
