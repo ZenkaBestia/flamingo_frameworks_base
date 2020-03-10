@@ -879,5 +879,9 @@
             </intent-filter>
         </receiver>
         <uses-library android:name="com.qti.extphone.extphonelib"/>
+
+        <!-- FPS Info -->
+        <service android:name=".FPSInfoService"
+            android:exported="false" />
     </application>
 </manifest>
