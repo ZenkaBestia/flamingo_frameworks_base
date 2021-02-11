@@ -4843,6 +4843,37 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION";
 
 
+    /**
+     * Broadcast action for alertslider position change.
+     *
+     * @hide
+     */
+    public static final String ACTION_SLIDER_POSITION_CHANGED =
+            "android.intent.action.SLIDER_POSITION_CHANGED";
+
+    /**
+     * Extra data for the position of alertslider.
+     * Should be an integer value in the range [0..2].
+     *
+     * @hide
+     */
+    public static final String EXTRA_SLIDER_POSITION =
+            "android.intent.extra.SLIDER_POSITION";
+
+    /**
+     * Extra data for the mode corresponding to the position of alertslider.
+     * Should be one of these string constants:
+     * @string/alert_slider_mode_normal
+     * @string/alert_slider_mode_priority
+     * @string/alert_slider_mode_vibrate
+     * @string/alert_slider_mode_silent
+     * @string/alert_slider_mode_dnd
+     *
+     * @hide
+     */
+    public static final String EXTRA_SLIDER_MODE =
+            "android.intent.extra.SLIDER_MODE";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
