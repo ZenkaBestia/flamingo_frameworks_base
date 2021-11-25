@@ -87,5 +87,6 @@ public class SystemSettings {
         Settings.System.LOCKSCREEN_BATTERY_INFO,
         Settings.System.DOZE_ON_CHARGE,
         Settings.System.SCREEN_OFF_UDFPS,
+        Settings.System.FULLSCREEN_GESTURES,
     };
 }
