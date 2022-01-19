@@ -175,7 +175,8 @@ public class UdfpsController implements DozeReceiver, UdfpsHbmProvider {
     private Set<Callback> mCallbacks = new HashSet<>();
     private final int mUdfpsVendorCode;
     private final SystemSettings mSystemSettings;
-    private boolean mScreenOffFod;
+    private boolean mScreenOffFod = false;
+    private boolean mUdfpsStartHapticFeedbackEnabled = true;
 
     // Boostframework for UDFPS
     private BoostFramework mPerf = null;
@@ -659,21 +660,34 @@ public class UdfpsController implements DozeReceiver, UdfpsHbmProvider {
         mUdfpsVendorCode = mContext.getResources().getInteger(R.integer.config_udfps_vendor_code);
         mSystemSettings = systemSettings;
         updateScreenOffFodState();
-        mSystemSettings.registerContentObserver(Settings.System.SCREEN_OFF_UDFPS,
-            new ContentObserver(mMainHandler) {
-                @Override
-                public void onChange(boolean selfChange, Uri uri) {
-                    if (uri.getLastPathSegment().equals(Settings.System.SCREEN_OFF_UDFPS)) {
+        updateUdfpsStartHapticFeedback();
+        final ContentObserver settingsObserver = new ContentObserver(mMainHandler) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                switch (uri.getLastPathSegment()) {
+                    case Settings.System.SCREEN_OFF_UDFPS:
                         updateScreenOffFodState();
-                    }
+                        break;
+                    case Settings.System.ENABLE_UDFPS_START_HAPTIC_FEEDBACK:
+                        updateUdfpsStartHapticFeedback();
                 }
             }
-        );
+        };
         mPerf = new BoostFramework();
+        mSystemSettings.registerContentObserverForUser(Settings.System.SCREEN_OFF_UDFPS,
+            settingsObserver, UserHandle.USER_ALL);
+        mSystemSettings.registerContentObserverForUser(Settings.System.ENABLE_UDFPS_START_HAPTIC_FEEDBACK,
+            settingsObserver, UserHandle.USER_ALL);
     }
 
     private void updateScreenOffFodState() {
-        mScreenOffFod = mSystemSettings.getInt(Settings.System.SCREEN_OFF_UDFPS, 0) == 1;
+        mScreenOffFod = mSystemSettings.getIntForUser(Settings.System.SCREEN_OFF_UDFPS,
+            0, UserHandle.USER_CURRENT) == 1;
+    }
+
+    private void updateUdfpsStartHapticFeedback() {
+        mUdfpsStartHapticFeedbackEnabled = mSystemSettings.getIntForUser(
+            Settings.System.ENABLE_UDFPS_START_HAPTIC_FEEDBACK, 1, UserHandle.USER_CURRENT) == 1;
     }
 
     /**
@@ -681,7 +695,7 @@ public class UdfpsController implements DozeReceiver, UdfpsHbmProvider {
      */
     @VisibleForTesting
     public void playStartHaptic() {
-        if (mVibrator != null) {
+        if (mVibrator != null && mUdfpsStartHapticFeedbackEnabled) {
             mVibrator.vibrate(
                     Process.myUid(),
                     mContext.getOpPackageName(),
