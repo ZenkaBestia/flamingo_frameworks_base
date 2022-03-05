@@ -2,7 +2,6 @@ package com.flamingo.systemui;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.os.Handler;
 
 import com.flamingo.systemui.dagger.FlamingoGlobalRootComponent;
 import com.flamingo.systemui.dagger.FlamingoSysUIComponent;
